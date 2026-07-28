@@ -12,31 +12,24 @@ import {
 } from '@/lib/types';
 import { computeResults } from '@/lib/calculations';
 import { generatePlan } from '@/lib/exercisePlan';
-import { getToday, getStartOfWeek } from '@/lib/utils';
+import { getToday } from '@/lib/utils';
 import { getCurrentUser, getUserDataKey } from '@/lib/auth';
 
+function getPersistKey() {
+  const user = getCurrentUser();
+  return user ? getUserDataKey(user) : 'weight-loss-planner-storage';
+}
+
 interface AppState {
-  // User profile
   profile: UserProfile | null;
   results: ComputedResults | null;
-
-  // Start date of plan
   planStartDate: string;
-
-  // Exercise plan
   weekPlans: WeekPlan[];
-
-  // Daily logs
   foodEntries: Record<string, FoodEntry[]>;
   exerciseLogs: Record<string, ExerciseLog[]>;
-
-  // Weight tracking
   weightLogs: Record<string, WeightLog>;
-
-  // Theme
   theme: 'dark' | 'light';
 
-  // Actions
   setProfile: (profile: UserProfile) => void;
   addFoodEntry: (entry: FoodEntry) => void;
   removeFoodEntry: (date: string, id: string) => void;
@@ -49,12 +42,6 @@ interface AppState {
   resetPlan: () => void;
   exportData: () => string;
   importData: (json: string) => void;
-}
-
-function getStorageKey() {
-  const user = getCurrentUser();
-  if (user) return getUserDataKey(user);
-  return 'weight-loss-planner-storage';
 }
 
 export const useStore = create<AppState>()(
@@ -72,142 +59,68 @@ export const useStore = create<AppState>()(
       setProfile: (profile: UserProfile) => {
         const results = computeResults(profile);
         const weekPlans = generatePlan(profile.planDurationWeeks);
-        set({
-          profile,
-          results,
-          planStartDate: getToday(),
-          weekPlans,
-        });
+        set({ profile, results, planStartDate: getToday(), weekPlans });
       },
 
       addFoodEntry: (entry: FoodEntry) => {
         const { foodEntries } = get();
         const date = entry.date;
-        const existing = foodEntries[date] || [];
-        set({
-          foodEntries: {
-            ...foodEntries,
-            [date]: [...existing, entry],
-          },
-        });
+        set({ foodEntries: { ...foodEntries, [date]: [...(foodEntries[date] || []), entry] } });
       },
 
       removeFoodEntry: (date: string, id: string) => {
         const { foodEntries } = get();
-        const entries = (foodEntries[date] || []).filter((e) => e.id !== id);
-        set({
-          foodEntries: {
-            ...foodEntries,
-            [date]: entries,
-          },
-        });
+        set({ foodEntries: { ...foodEntries, [date]: (foodEntries[date] || []).filter((e) => e.id !== id) } });
       },
 
       toggleExercise: (date: string, id: string) => {
         const { exerciseLogs } = get();
-        const logs = (exerciseLogs[date] || []).map((log) =>
-          log.id === id ? { ...log, completed: !log.completed } : log
-        );
-        set({
-          exerciseLogs: {
-            ...exerciseLogs,
-            [date]: logs,
-          },
-        });
+        set({ exerciseLogs: { ...exerciseLogs, [date]: (exerciseLogs[date] || []).map((l) => l.id === id ? { ...l, completed: !l.completed } : l) } });
       },
 
       addExerciseLog: (log: ExerciseLog) => {
         const { exerciseLogs } = get();
         const date = log.date;
-        const existing = exerciseLogs[date] || [];
-        set({
-          exerciseLogs: {
-            ...exerciseLogs,
-            [date]: [...existing, log],
-          },
-        });
+        set({ exerciseLogs: { ...exerciseLogs, [date]: [...(exerciseLogs[date] || []), log] } });
       },
 
       removeExerciseLog: (date: string, id: string) => {
         const { exerciseLogs } = get();
-        const logs = (exerciseLogs[date] || []).filter((e) => e.id !== id);
-        set({
-          exerciseLogs: {
-            ...exerciseLogs,
-            [date]: logs,
-          },
-        });
+        set({ exerciseLogs: { ...exerciseLogs, [date]: (exerciseLogs[date] || []).filter((e) => e.id !== id) } });
       },
 
       updateExerciseLog: (date: string, id: string, updates: Partial<ExerciseLog>) => {
         const { exerciseLogs } = get();
-        const logs = (exerciseLogs[date] || []).map((log) =>
-          log.id === id ? { ...log, ...updates } : log
-        );
-        set({
-          exerciseLogs: {
-            ...exerciseLogs,
-            [date]: logs,
-          },
-        });
+        set({ exerciseLogs: { ...exerciseLogs, [date]: (exerciseLogs[date] || []).map((l) => l.id === id ? { ...l, ...updates } : l) } });
       },
 
       recordWeight: (log: WeightLog) => {
         const { weightLogs } = get();
-        set({
-          weightLogs: {
-            ...weightLogs,
-            [log.date]: log,
-          },
-        });
+        set({ weightLogs: { ...weightLogs, [log.date]: log } });
       },
 
       toggleTheme: () => {
-        const { theme } = get();
-        const next = theme === 'dark' ? 'light' : 'dark';
-        set({ theme: next });
+        set({ theme: get().theme === 'dark' ? 'light' : 'dark' });
       },
 
       resetPlan: () => {
-        set({
-          profile: null,
-          results: null,
-          planStartDate: '',
-          weekPlans: [],
-          foodEntries: {},
-          exerciseLogs: {},
-          weightLogs: {},
-        });
+        set({ profile: null, results: null, planStartDate: '', weekPlans: [], foodEntries: {}, exerciseLogs: {}, weightLogs: {} });
       },
 
       exportData: () => {
-        const state = get();
-        const exportObj = {
-          profile: state.profile,
-          results: state.results,
-          planStartDate: state.planStartDate,
-          weekPlans: state.weekPlans,
-          foodEntries: state.foodEntries,
-          exerciseLogs: state.exerciseLogs,
-          weightLogs: state.weightLogs,
-        };
-        return JSON.stringify(exportObj, null, 2);
+        const s = get();
+        return JSON.stringify({ profile: s.profile, results: s.results, planStartDate: s.planStartDate, weekPlans: s.weekPlans, foodEntries: s.foodEntries, exerciseLogs: s.exerciseLogs, weightLogs: s.weightLogs }, null, 2);
       },
 
       importData: (json: string) => {
         try {
           const data = JSON.parse(json);
-          set({
-            ...data,
-            theme: get().theme,
-          });
-        } catch {
-          throw new Error('导入数据格式不正确');
-        }
+          set({ ...data, theme: get().theme });
+        } catch { throw new Error('导入数据格式不正确'); }
       },
     }),
     {
-      name: getStorageKey(),
+      name: 'wlp-store-v2',
       partialize: (state) => ({
         profile: state.profile,
         results: state.results,
@@ -221,3 +134,48 @@ export const useStore = create<AppState>()(
     }
   )
 );
+
+// ---- User-scoped storage bridge ----
+// Instead of using persist name per user (which doesn't work because name is frozen at module init),
+// we use a fixed persist key and manually swap data on login/logout.
+
+function getScopedState() {
+  try {
+    const raw = localStorage.getItem(getPersistKey());
+    return raw ? JSON.parse(raw).state : null;
+  } catch { return null; }
+}
+
+function persistScopedState(state: unknown) {
+  try {
+    const key = getPersistKey();
+    const existing = JSON.parse(localStorage.getItem(key) || '{}');
+    existing.state = state;
+    localStorage.setItem(key, JSON.stringify(existing));
+  } catch {}
+}
+
+/** Call after login: migrate user-scoped data into the store */
+export function loadUserData() {
+  const scoped = getScopedState();
+  if (scoped) {
+    useStore.setState({ ...scoped, theme: useStore.getState().theme });
+  } else {
+    useStore.setState({ profile: null, results: null, planStartDate: '', weekPlans: [], foodEntries: {}, exerciseLogs: {}, weightLogs: {} });
+  }
+}
+
+/** Call before logout: persist current store state to user-scoped key */
+export function saveUserData() {
+  const state = useStore.getState();
+  persistScopedState({
+    profile: state.profile,
+    results: state.results,
+    planStartDate: state.planStartDate,
+    weekPlans: state.weekPlans,
+    foodEntries: state.foodEntries,
+    exerciseLogs: state.exerciseLogs,
+    weightLogs: state.weightLogs,
+    theme: state.theme,
+  });
+}

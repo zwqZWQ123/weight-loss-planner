@@ -72,7 +72,7 @@ export function Sidebar() {
           <span>{theme === 'dark' ? '浅色模式' : '深色模式'}</span>
         </button>
         <button
-          onClick={() => { signOut(); window.location.href = '/'; }}
+          onClick={signOut}
           className="flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--danger)] hover:text-[var(--danger)]/80 w-full transition-colors"
         >
           <LogOut size={18} strokeWidth={1.5} />
