@@ -1,6 +1,6 @@
 const AUTH_STORAGE_KEY = 'weight-loss-planner-auth';
 const SESSION_KEY = 'weight-loss-planner-session';
-const SALT = 'wlp-salt-2024'; // pepper for hash
+const SALT = 'wlp-salt-2024';
 
 export interface StoredUser {
   username: string;
@@ -13,13 +13,15 @@ export interface AuthSession {
   loggedInAt: string;
 }
 
-/** SHA-256 hash with salt */
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password + SALT);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+/** Simple synchronous hash for password obfuscation (localStorage-only protection) */
+function hashPassword(password: string): string {
+  let h = 0;
+  const s = password + SALT;
+  for (let i = 0; i < s.length; i++) {
+    h = ((h << 5) - h) + s.charCodeAt(i);
+    h = h & h;
+  }
+  return 'h' + Math.abs(h).toString(36);
 }
 
 function getUsers(): StoredUser[] {
@@ -52,7 +54,7 @@ function clearSession() {
   sessionStorage.removeItem(SESSION_KEY);
 }
 
-export async function register(username: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export function register(username: string, password: string): { ok: true } | { ok: false; error: string } {
   if (username.length < 2) return { ok: false, error: '用户名至少 2 个字符' };
   if (password.length < 6) return { ok: false, error: '密码至少 6 个字符' };
   if (!/^[a-zA-Z0-9_一-龥]+$/.test(username)) return { ok: false, error: '用户名只能包含字母、数字、下划线和中文' };
@@ -62,7 +64,7 @@ export async function register(username: string, password: string): Promise<{ ok
     return { ok: false, error: '用户名已存在' };
   }
 
-  const passwordHash = await hashPassword(password);
+  const passwordHash = hashPassword(password);
   users.push({ username, passwordHash, createdAt: new Date().toISOString() });
   saveUsers(users);
 
@@ -70,14 +72,14 @@ export async function register(username: string, password: string): Promise<{ ok
   return { ok: true };
 }
 
-export async function login(username: string, password: string): Promise<{ ok: true } | { ok: false; error: string }> {
+export function login(username: string, password: string): { ok: true } | { ok: false; error: string } {
   if (!username || !password) return { ok: false, error: '请输入用户名和密码' };
 
   const users = getUsers();
   const user = users.find((u) => u.username === username);
   if (!user) return { ok: false, error: '用户名或密码错误' };
 
-  const passwordHash = await hashPassword(password);
+  const passwordHash = hashPassword(password);
   if (user.passwordHash !== passwordHash) return { ok: false, error: '用户名或密码错误' };
 
   saveSession({ username, loggedInAt: new Date().toISOString() });

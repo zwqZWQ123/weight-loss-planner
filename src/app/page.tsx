@@ -19,19 +19,19 @@ export default function LoginPage() {
     }
   }, [router]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
 
     try {
       if (mode === 'login') {
-        const result = await login(username, password);
+        const result = login(username, password);
         if (!result.ok) { setError(result.error); setLoading(false); return; }
         router.replace('/onboarding');
       } else {
         if (password !== password2) { setError('两次密码输入不一致'); setLoading(false); return; }
-        const result = await register(username, password);
+        const result = register(username, password);
         if (!result.ok) { setError(result.error); setLoading(false); return; }
         router.replace('/onboarding');
       }
