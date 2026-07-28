@@ -6,7 +6,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatDate(date: Date): string {
-  return date.toISOString().split('T')[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 export function getToday(): string {
@@ -20,7 +23,7 @@ export function getWeekNumber(date: Date): number {
 }
 
 export function getChineseDayName(dayOfWeek: number): string {
-  const days = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+  const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   return days[dayOfWeek] || '';
 }
 

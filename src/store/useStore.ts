@@ -15,6 +15,7 @@ import { generatePlan } from '@/lib/exercisePlan';
 import { getToday, getStartOfWeek } from '@/lib/utils';
 
 interface AppState {
+  _hydrated: boolean;
   // User profile
   profile: UserProfile | null;
   results: ComputedResults | null;
@@ -52,6 +53,7 @@ interface AppState {
 export const useStore = create<AppState>()(
   persist(
     (set, get) => ({
+      _hydrated: false,
       profile: null,
       results: null,
       planStartDate: '',
@@ -187,6 +189,9 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'weight-loss-planner-storage',
+      onRehydrateStorage: () => () => {
+        useStore.setState({ _hydrated: true });
+      },
       partialize: (state) => ({
         profile: state.profile,
         results: state.results,

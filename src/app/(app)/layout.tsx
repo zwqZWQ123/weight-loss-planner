@@ -8,15 +8,21 @@ import { useStore } from '@/store/useStore';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const profile = useStore((s) => s.profile);
+  const hydrated = useStore((s) => s._hydrated);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!profile) {
-      router.push('/');
+      router.replace('/');
     }
-  }, [profile, router]);
+  }, [hydrated, profile, router]);
 
-  if (!profile) {
-    return null;
+  if (!hydrated || !profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
   return (

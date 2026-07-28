@@ -52,7 +52,7 @@ export default function ProgressPage() {
     }));
     if (profile && (sortedWeights.length === 0 || sortedWeights[0].date !== getToday())) {
       data.unshift({
-        date: profile ? new Date().toISOString().slice(5, 10) : '',
+        date: getToday().slice(5),
         weight: profile.currentWeightKg,
       });
     }
