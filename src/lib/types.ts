@@ -34,6 +34,7 @@ export interface FoodEntry {
   servingSize: string;
   timestamp: string;
   date: string;
+  imageUrl?: string;
 }
 
 export type ExerciseType = 'run' | 'basketball' | 'strength' | 'rest';

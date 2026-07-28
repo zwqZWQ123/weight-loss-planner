@@ -1,10 +1,30 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { Sun, Moon, Download, Upload, RotateCcw, User, Activity } from 'lucide-react';
+import { Sun, Moon, Download, Upload, RotateCcw, User, Activity, HardDrive, Smartphone } from 'lucide-react';
 import { getActivityLevelLabel } from '@/lib/utils';
+
+function StorageUsage() {
+  const [size, setSize] = useState('计算中...');
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('weight-loss-planner-storage');
+      if (raw) {
+        const bytes = new Blob([raw]).size;
+        if (bytes < 1024) setSize(`${bytes} B`);
+        else if (bytes < 1024 * 1024) setSize(`${(bytes / 1024).toFixed(1)} KB`);
+        else setSize(`${(bytes / (1024 * 1024)).toFixed(1)} MB`);
+      } else {
+        setSize('无数据');
+      }
+    } catch {
+      setSize('未知');
+    }
+  }, []);
+  return <span className="text-sm font-bold number-font">{size}</span>;
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -185,6 +205,34 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Multi-device sync guide */}
+      <div className="bg-[var(--card)] border p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <Smartphone size={18} strokeWidth={1.5} className="text-[var(--accent)]" />
+          <span className="text-xs tracking-wider uppercase font-semibold">多设备同步</span>
+        </div>
+        <div className="text-sm text-[var(--muted)] space-y-2">
+          <p>本应用数据存储在浏览器本地，不同设备之间不自动同步。</p>
+          <p className="font-semibold text-[var(--foreground)]">手动同步步骤：</p>
+          <ol className="list-decimal list-inside space-y-1 text-xs">
+            <li>在设备 A 上点击"导出为 JSON"，下载备份文件</li>
+            <li>将文件发送到设备 B（微信/邮件/AirDrop）</li>
+            <li>在设备 B 上打开文件，复制全部内容</li>
+            <li>在设备 B 本页点击"粘贴备份数据导入"</li>
+            <li>粘贴后点击"导入"即可</li>
+          </ol>
+        </div>
+      </div>
+
+      {/* Storage usage */}
+      <div className="bg-[var(--card)] border p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <HardDrive size={18} strokeWidth={1.5} className="text-[var(--accent)]" />
+          <span className="text-xs tracking-wider uppercase font-semibold">存储空间</span>
+        </div>
+        <StorageUsage />
       </div>
 
       {/* Reset */}

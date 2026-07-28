@@ -116,6 +116,7 @@ export default function ExercisePage() {
       actualDurationMinutes: log.actualDurationMinutes,
       notes: log.notes,
       completed: log.completed,
+      imageUrl: log.imageUrl,
     });
     setEditingLog(null);
   }
