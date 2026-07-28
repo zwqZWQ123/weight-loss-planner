@@ -4,25 +4,32 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar, TopNav, BottomNav } from '@/components/Navigation';
 import { useStore } from '@/store/useStore';
+import { useHydrated } from '@/components/useHydrated';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const profile = useStore((s) => s.profile);
-  const hydrated = useStore((s) => s._hydrated);
+  const hydrated = useHydrated();
 
   useEffect(() => {
-    if (!hydrated) return;
-    if (!profile) {
+    if (hydrated && !profile) {
       router.replace('/');
     }
   }, [hydrated, profile, router]);
 
-  if (!hydrated || !profile) {
+  if (!hydrated) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+          <span className="text-xs text-[var(--muted)]">加载中...</span>
+        </div>
       </div>
     );
+  }
+
+  if (!profile) {
+    return null;
   }
 
   return (
