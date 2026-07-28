@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { isLoggedIn, getCurrentUser, logout } from '@/lib/auth';
-import { loadUserData, saveUserData } from '@/store/useStore';
+import { loadUserData } from '@/store/useStore';
 
 interface AuthContextType {
   user: string | null;
@@ -19,23 +19,19 @@ const AuthContext = createContext<AuthContextType>({
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     const u = getCurrentUser();
     setUser(u);
-    if (u && !initialized) {
+    if (u) {
       loadUserData();
-      setInitialized(true);
     }
     setLoading(false);
-  }, [initialized]);
+  }, []);
 
   function signOut() {
-    saveUserData(); // persist current store to user-scoped key before logout
     logout();
     setUser(null);
-    // Reload to reset the store
     window.location.href = '/';
   }
 

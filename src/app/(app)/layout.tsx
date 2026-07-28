@@ -11,30 +11,25 @@ import { useAuth } from '@/components/AuthProvider';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const profile = useStore((s) => s.profile);
-  const hydrated = useHydrated();
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
-  // Redirect to onboarding if no profile
   useEffect(() => {
-    if (hydrated && !profile) {
+    if (!authLoading && user && !profile) {
       router.replace('/onboarding');
     }
-  }, [hydrated, profile, router]);
+  }, [authLoading, user, profile, router]);
 
-  if (!hydrated) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
-          <span className="text-xs text-[var(--muted)]">加载中...</span>
-        </div>
+        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
       </div>
     );
   }
 
-  if (!profile) {
-    return null;
-  }
+  if (!user) return null;
+
+  if (!profile) return null;
 
   return (
     <AuthGuard>
