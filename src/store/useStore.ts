@@ -13,6 +13,7 @@ import {
 import { computeResults } from '@/lib/calculations';
 import { generatePlan } from '@/lib/exercisePlan';
 import { getToday, getStartOfWeek } from '@/lib/utils';
+import { getCurrentUser, getUserDataKey } from '@/lib/auth';
 
 interface AppState {
   // User profile
@@ -48,6 +49,12 @@ interface AppState {
   resetPlan: () => void;
   exportData: () => string;
   importData: (json: string) => void;
+}
+
+function getStorageKey() {
+  const user = getCurrentUser();
+  if (user) return getUserDataKey(user);
+  return 'weight-loss-planner-storage';
 }
 
 export const useStore = create<AppState>()(
@@ -200,7 +207,7 @@ export const useStore = create<AppState>()(
       },
     }),
     {
-      name: 'weight-loss-planner-storage',
+      name: getStorageKey(),
       partialize: (state) => ({
         profile: state.profile,
         results: state.results,

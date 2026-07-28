@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
+import { useAuth } from '@/components/AuthProvider';
 import {
   LayoutDashboard,
   Dumbbell,
@@ -11,6 +12,7 @@ import {
   Settings,
   Sun,
   Moon,
+  LogOut,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,6 +28,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
+  const { signOut } = useAuth();
 
   return (
     <aside className="fixed top-0 left-0 bottom-0 w-[200px] border-r z-40 bg-[var(--background)] hidden md:flex flex-col">
@@ -60,13 +63,20 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t">
+      <div className="p-3 border-t space-y-1">
         <button
           onClick={toggleTheme}
           className="flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--muted)] hover:text-[var(--foreground)] w-full transition-colors"
         >
           {theme === 'dark' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
           <span>{theme === 'dark' ? '浅色模式' : '深色模式'}</span>
+        </button>
+        <button
+          onClick={() => { signOut(); window.location.href = '/'; }}
+          className="flex items-center gap-3 px-3 py-2.5 text-sm text-[var(--danger)] hover:text-[var(--danger)]/80 w-full transition-colors"
+        >
+          <LogOut size={18} strokeWidth={1.5} />
+          <span>退出登录</span>
         </button>
       </div>
     </aside>

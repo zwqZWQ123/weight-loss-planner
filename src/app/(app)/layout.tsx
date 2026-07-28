@@ -2,18 +2,22 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import AuthGuard from '@/components/AuthGuard';
 import { Sidebar, TopNav, BottomNav } from '@/components/Navigation';
 import { useStore } from '@/store/useStore';
 import { useHydrated } from '@/components/useHydrated';
+import { useAuth } from '@/components/AuthProvider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const profile = useStore((s) => s.profile);
   const hydrated = useHydrated();
+  const { user } = useAuth();
 
+  // Redirect to onboarding if no profile
   useEffect(() => {
     if (hydrated && !profile) {
-      router.replace('/');
+      router.replace('/onboarding');
     }
   }, [hydrated, profile, router]);
 
@@ -33,15 +37,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex">
-      <Sidebar />
-      <TopNav />
-      <main className="flex-1 md:ml-[200px] pb-16 md:pb-0 pt-12 md:pt-0">
-        <div className="p-4 md:p-6 max-w-6xl mx-auto">
-          {children}
-        </div>
-      </main>
-      <BottomNav />
-    </div>
+    <AuthGuard>
+      <div className="min-h-screen flex">
+        <Sidebar />
+        <TopNav />
+        <main className="flex-1 md:ml-[200px] pb-16 md:pb-0 pt-12 md:pt-0">
+          <div className="p-4 md:p-6 max-w-6xl mx-auto">
+            {children}
+          </div>
+        </main>
+        <BottomNav />
+      </div>
+    </AuthGuard>
   );
 }
