@@ -48,6 +48,8 @@ export interface ExerciseLog {
   caloriesBurned: number;
   completed: boolean;
   notes?: string;
+  imageUrl?: string;
+  actualDurationMinutes?: number;
 }
 
 export interface WeightLog {

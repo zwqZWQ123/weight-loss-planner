@@ -42,6 +42,7 @@ interface AppState {
   toggleExercise: (date: string, id: string) => void;
   addExerciseLog: (log: ExerciseLog) => void;
   removeExerciseLog: (date: string, id: string) => void;
+  updateExerciseLog: (date: string, id: string, updates: Partial<ExerciseLog>) => void;
   recordWeight: (log: WeightLog) => void;
   toggleTheme: () => void;
   resetPlan: () => void;
@@ -123,6 +124,19 @@ export const useStore = create<AppState>()(
       removeExerciseLog: (date: string, id: string) => {
         const { exerciseLogs } = get();
         const logs = (exerciseLogs[date] || []).filter((e) => e.id !== id);
+        set({
+          exerciseLogs: {
+            ...exerciseLogs,
+            [date]: logs,
+          },
+        });
+      },
+
+      updateExerciseLog: (date: string, id: string, updates: Partial<ExerciseLog>) => {
+        const { exerciseLogs } = get();
+        const logs = (exerciseLogs[date] || []).map((log) =>
+          log.id === id ? { ...log, ...updates } : log
+        );
         set({
           exerciseLogs: {
             ...exerciseLogs,
