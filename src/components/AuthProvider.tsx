@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { isLoggedIn, getCurrentUser, logout } from '@/lib/auth';
-import { loadUserData } from '@/store/useStore';
 
 interface AuthContextType {
   user: string | null;
@@ -21,11 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const u = getCurrentUser();
-    setUser(u);
-    if (u) {
-      loadUserData();
-    }
+    setUser(getCurrentUser());
     setLoading(false);
   }, []);
 

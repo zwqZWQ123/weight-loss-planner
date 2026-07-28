@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import AuthGuard from '@/components/AuthGuard';
 import { Sidebar, TopNav, BottomNav } from '@/components/Navigation';
 import { useStore } from '@/store/useStore';
-import { useHydrated } from '@/components/useHydrated';
 import { useAuth } from '@/components/AuthProvider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +27,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) return null;
-
   if (!profile) return null;
 
   return (
