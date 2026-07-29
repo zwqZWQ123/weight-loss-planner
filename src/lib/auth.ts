@@ -1,6 +1,6 @@
-const AUTH_STORAGE_KEY = 'weight-loss-planner-auth';
+const AUTH_STORAGE_KEY = 'wlp-auth-v1';
 const SESSION_KEY = 'weight-loss-planner-session';
-const SALT = 'wlp-salt-2024';
+const SALT = 'wlp-salt-v2';
 
 export interface StoredUser {
   username: string;
@@ -13,15 +13,15 @@ export interface AuthSession {
   loggedInAt: string;
 }
 
-/** Simple synchronous hash for password obfuscation (localStorage-only protection) */
+/** djb2 hash with salt — deterministic and synchronous */
 function hashPassword(password: string): string {
-  let h = 0;
+  let h = 5381;
   const s = password + SALT;
   for (let i = 0; i < s.length; i++) {
-    h = ((h << 5) - h) + s.charCodeAt(i);
-    h = h & h;
+    h = ((h << 5) + h) ^ s.charCodeAt(i);
+    h = h >>> 0;
   }
-  return 'h' + Math.abs(h).toString(36);
+  return 'p_' + h.toString(36);
 }
 
 function getUsers(): StoredUser[] {
