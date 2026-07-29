@@ -102,10 +102,10 @@ export function isLoggedIn(): boolean {
 
 /** Get localStorage key scoped to current user */
 export function getUserDataKey(username: string): string {
-  return `weight-loss-planner-data-${username}`;
+  return `wlp-${username}`;
 }
 
 /** Migrate legacy data to current user's namespace */
 export function getLegacyDataKey(): string {
-  return 'weight-loss-planner-storage';
+  return 'wlp-store-v2';
 }
