@@ -52,7 +52,7 @@ export default function OnboardingPage() {
     };
 
     setProfile(p);
-    router.push('/dashboard');
+    router.replace('/dashboard');
   };
 
   const update = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
