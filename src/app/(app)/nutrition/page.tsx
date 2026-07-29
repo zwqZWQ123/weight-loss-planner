@@ -311,10 +311,14 @@ export default function NutritionPage() {
                 </div>
               ) : (
                 <div className="text-center py-4 space-y-2">
-                  <p className="text-sm text-[var(--muted)]">未能识别食物</p>
-                  <p className="text-xs text-[var(--muted)]">你可以手动搜索或自定义添加</p>
-                  <button onClick={() => { setShowPhotoCapture(false); setShowFoodPicker(true); }}
-                    className="py-1.5 px-4 border text-sm hover:border-[var(--accent)]">搜索食物</button>
+                  <p className="text-sm text-[var(--muted)]">拍照已就绪，请从下方添加食物</p>
+                  <p className="text-xs text-[var(--muted)]">通过搜索或自定义填写来录入这餐的营养数据</p>
+                  <div className="flex gap-2 justify-center pt-1">
+                    <button onClick={() => { setShowPhotoCapture(false); setShowFoodPicker(true); }}
+                      className="py-1.5 px-4 border text-sm hover:border-[var(--accent)]">搜索食物</button>
+                    <button onClick={() => { setShowCustomForm(true); }}
+                      className="py-1.5 px-4 border text-sm hover:border-[var(--accent)]">自定义输入</button>
+                  </div>
                 </div>
               )}
             </>
