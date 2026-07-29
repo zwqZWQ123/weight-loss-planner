@@ -18,8 +18,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, user, profile, router]);
 
-  // Show spinner while auth is loading
-  if (authLoading) {
+  // Show spinner while auth is loading or profile is null (initial load)
+  if (authLoading || !profile) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
