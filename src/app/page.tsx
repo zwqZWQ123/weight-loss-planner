@@ -55,7 +55,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-xs tracking-wider text-[var(--muted)] uppercase">用户名</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value.trim())} placeholder="输入用户名"
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="输入用户名"
               autoComplete="username"
               className="w-full bg-transparent border px-3 py-2.5 text-sm text-[var(--foreground)] focus:border-[var(--accent)] transition-colors mt-1.5" />
           </div>
