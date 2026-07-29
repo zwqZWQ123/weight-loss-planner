@@ -17,8 +17,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   }, [authLoading, user, profile, router]);
 
-  // Show spinner while auth is loading or profile is still null (initial load)
-  if (authLoading || !profile) {
+  // Loading state: not yet hydrated
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
         <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
@@ -26,8 +26,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Not logged in: AuthGuard handles redirect to /
+  // Not logged in
   if (!user) return null;
+
+  // Logged in but no profile — redirect to onboarding
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--background)]">
+        <div className="w-6 h-6 border-2 border-[var(--accent)] border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex">
