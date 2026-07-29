@@ -79,13 +79,19 @@ export function login(username: string, password: string): { ok: true } | { ok: 
 
   const users = getUsers();
   const user = users.find((u) => u.username === clean);
-  if (!user) return { ok: false, error: '用户名或密码错误' };
+  if (!user) return { ok: false, error: `未找到用户 "${clean}"，请先注册` };
 
   const passwordHash = hashPassword(password);
-  if (user.passwordHash !== passwordHash) return { ok: false, error: '用户名或密码错误' };
+  if (user.passwordHash !== passwordHash) return { ok: false, error: '密码错误' };
 
   saveSession({ username: clean, loggedInAt: new Date().toISOString() });
   return { ok: true };
+}
+
+/** Clear all auth data from localStorage (for debugging) */
+export function clearAuthData() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  clearSession();
 }
 
 /** Check if a user exists by case-insensitive lookup */
