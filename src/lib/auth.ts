@@ -88,18 +88,6 @@ export function login(username: string, password: string): { ok: true } | { ok: 
   return { ok: true };
 }
 
-/** Clear all auth data from localStorage (for debugging) */
-export function clearAuthData() {
-  localStorage.removeItem(AUTH_STORAGE_KEY);
-  clearSession();
-}
-
-/** Check if a user exists by case-insensitive lookup */
-export function userExists(username: string): boolean {
-  const clean = username.trim().toLowerCase();
-  return getUsers().some((u) => u.username === clean);
-}
-
 export function logout() {
   clearSession();
 }
