@@ -42,7 +42,7 @@ interface AppState {
 function getKey(): string | null {
   try {
     const user = getCurrentUser();
-    return user ? `wlp-data-${user}` : null;
+    return user ? `wlp-${user}` : null;
   } catch { return null; }
 }
 

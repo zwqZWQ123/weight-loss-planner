@@ -88,6 +88,12 @@ export function login(username: string, password: string): { ok: true } | { ok: 
   return { ok: true };
 }
 
+/** Check if a user exists by case-insensitive lookup */
+export function userExists(username: string): boolean {
+  const clean = username.trim().toLowerCase();
+  return getUsers().some((u) => u.username === clean);
+}
+
 export function logout() {
   clearSession();
 }
