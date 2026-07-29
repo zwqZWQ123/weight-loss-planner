@@ -21,7 +21,7 @@ function hashPassword(password: string): string {
     h = ((h << 5) + h) ^ s.charCodeAt(i);
     h = h >>> 0;
   }
-  return 'p_' + h.toString(36);
+  return h.toString(36);
 }
 
 function getUsers(): StoredUser[] {
@@ -55,34 +55,36 @@ function clearSession() {
 }
 
 export function register(username: string, password: string): { ok: true } | { ok: false; error: string } {
-  if (username.length < 2) return { ok: false, error: '用户名至少 2 个字符' };
+  const clean = username.trim().toLowerCase();
+  if (clean.length < 2) return { ok: false, error: '用户名至少 2 个字符' };
   if (password.length < 6) return { ok: false, error: '密码至少 6 个字符' };
-  if (!/^[a-zA-Z0-9_一-龥]+$/.test(username)) return { ok: false, error: '用户名只能包含字母、数字、下划线和中文' };
+  if (!/^[a-zA-Z0-9_一-龥]+$/.test(clean)) return { ok: false, error: '用户名只能包含字母、数字、下划线和中文' };
 
   const users = getUsers();
-  if (users.some((u) => u.username === username)) {
+  if (users.some((u) => u.username === clean)) {
     return { ok: false, error: '用户名已存在' };
   }
 
   const passwordHash = hashPassword(password);
-  users.push({ username, passwordHash, createdAt: new Date().toISOString() });
+  users.push({ username: clean, passwordHash, createdAt: new Date().toISOString() });
   saveUsers(users);
 
-  saveSession({ username, loggedInAt: new Date().toISOString() });
+  saveSession({ username: clean, loggedInAt: new Date().toISOString() });
   return { ok: true };
 }
 
 export function login(username: string, password: string): { ok: true } | { ok: false; error: string } {
-  if (!username || !password) return { ok: false, error: '请输入用户名和密码' };
+  const clean = username.trim().toLowerCase();
+  if (!clean || !password) return { ok: false, error: '请输入用户名和密码' };
 
   const users = getUsers();
-  const user = users.find((u) => u.username === username);
+  const user = users.find((u) => u.username === clean);
   if (!user) return { ok: false, error: '用户名或密码错误' };
 
   const passwordHash = hashPassword(password);
   if (user.passwordHash !== passwordHash) return { ok: false, error: '用户名或密码错误' };
 
-  saveSession({ username, loggedInAt: new Date().toISOString() });
+  saveSession({ username: clean, loggedInAt: new Date().toISOString() });
   return { ok: true };
 }
 
