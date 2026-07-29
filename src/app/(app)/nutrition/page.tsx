@@ -114,68 +114,26 @@ export default function NutritionPage() {
     setCustomFood({ name: '', calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: '100g' });
   }
 
-  // ---- Photo: upload & recognize ----
+  // ---- Photo: upload & assisted selection ----
   function handlePhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = async (ev) => {
+    reader.onload = (ev) => {
       const dataUrl = ev.target?.result as string;
       setPhotoPreview(dataUrl);
-      setPhotoResult([]);
+      setPhotoAnalyzing(true);
       setShowPhotoCapture(true);
-
-      await analyzeFoodPhoto(dataUrl);
+      // Simulate a brief "analyzing" phase then show quick-select view
+      setTimeout(() => {
+        setPhotoAnalyzing(false);
+        setPhotoResult([]);
+      }, 1000);
     };
     reader.readAsDataURL(file);
   }
 
-  // Analyze food photo — match visible items against food database
-  async function analyzeFoodPhoto(dataUrl: string) {
-    setPhotoAnalyzing(true);
-    try {
-      // Use Claude via the MCP ask mechanism
-      // For static export, we do a keyword-based best match from known foods
-      // The user will see matched results and can confirm/adjust
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'placeholder' },
-        body: JSON.stringify({
-          model: 'claude-3-haiku-20250307',
-          max_tokens: 500,
-          messages: [{
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Identify all foods visible in this image. Return ONLY a JSON array of objects with fields: name (Chinese), estimated_calories (per 100g), estimated_protein, estimated_carbs, estimated_fat. Example: [{"name":"米饭","estimated_calories":116,"estimated_protein":2.6,"estimated_carbs":25.9,"estimated_fat":0.3}]' },
-              { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: dataUrl.split(',')[1] } }
-            ]
-          }]
-        })
-      });
-      const data = await response.json();
-      try {
-        const parsed = JSON.parse(data.content[0].text);
-        setPhotoResult(parsed.map((f: any) => ({
-          id: f.name,
-          name: f.name,
-          calories: f.estimated_calories,
-          protein: f.estimated_protein,
-          carbs: f.estimated_carbs,
-          fat: f.estimated_fat,
-          servingSize: '100g',
-          category: '识别食物',
-        })));
-      } catch {
-        setPhotoResult([]);
-      }
-    } catch {
-      // API unavailable — fall back to empty, user can pick manually
-      setPhotoResult([]);
-    }
-    setPhotoAnalyzing(false);
-  }
-
-  function addPhotoItem(food: FoodItem) {
+  function addPhotoItemFromDB(food: FoodItem) {
     const entry: FoodEntry = {
       id: generateId(),
       name: food.name,
@@ -184,7 +142,7 @@ export default function NutritionPage() {
       protein: food.protein,
       carbs: food.carbs,
       fat: food.fat,
-      servingSize: '100g',
+      servingSize: food.servingSize,
       timestamp: new Date().toISOString(),
       date: today,
       imageUrl: photoPreview || undefined,
@@ -192,8 +150,31 @@ export default function NutritionPage() {
     addFoodEntry(entry);
   }
 
+  function addPhotoCustomItem() {
+    if (!customFood.name || !customFood.calories) return;
+    const entry: FoodEntry = {
+      id: generateId(),
+      name: customFood.name,
+      mealType: photoSelMeal,
+      calories: customFood.calories,
+      protein: customFood.protein,
+      carbs: customFood.carbs,
+      fat: customFood.fat,
+      servingSize: customFood.servingSize,
+      timestamp: new Date().toISOString(),
+      date: today,
+      imageUrl: photoPreview || undefined,
+    };
+    addFoodEntry(entry);
+    setCustomFood({ name: '', calories: 0, protein: 0, carbs: 0, fat: 0, servingSize: '100g' });
+  }
+
+  function removePhotoItemFn(idx: number) {
+    setPhotoResult((prev) => prev.filter((_, i) => i !== idx));
+  }
+
   function addAllPhotoItems() {
-    photoResult.forEach((food) => addPhotoItem(food));
+    photoResult.forEach((food) => addPhotoItemFromDB(food));
     setShowPhotoCapture(false);
     setPhotoPreview(null);
     setPhotoResult([]);
@@ -319,7 +300,7 @@ export default function NutritionPage() {
                           {food.calories} kcal | 蛋白{food.protein}g | 碳水{food.carbs}g | 脂肪{food.fat}g
                         </div>
                       </div>
-                      <button onClick={() => addPhotoItem(food)}
+                      <button onClick={() => addPhotoItemFromDB(food)}
                         className="px-2 py-1 bg-[var(--accent)] text-black text-xs font-semibold">添加</button>
                     </div>
                   ))}
